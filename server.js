@@ -8,7 +8,7 @@ const app = express();
 require('dotenv').config(); 
 
 const hostname = "localhost";
-const port = 3001;
+const port = process.env.PORT || 3001;
 const API_KEY = process.env.DIFY_API_KEY;
 const url = process.env.DIFY_API_ENDPOINT;
 
@@ -28,8 +28,6 @@ const fetchApiData = async () => {
     const transcript = await read_transcript("assets/transcript_1.txt"); // Read the transcript
     const parsedTranscript = JSON.parse(transcript);
     const QUERY = parsedTranscript.result.segments.map(segment => segment.text).join(" "); // Join with a space
-
-    console.log(QUERY);
 
     try {
         const response = await axios.post(
@@ -98,5 +96,5 @@ app.post('/api/proxy', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Proxy server running at http://localhost:${port}`);
+    console.log(`Proxy server running at ${port}`);
 });
