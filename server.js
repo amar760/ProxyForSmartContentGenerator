@@ -88,7 +88,7 @@ app.post('/api/proxy', async (req, res) => {
         res.end(JSON.stringify(data)); 
     } catch (err) {
         res.statusCode = 500;
-        res.end(JSON.stringify({ error: "Error making API call" }));
+        res.end(JSON.stringify({ error: `error : ${err}` }));
     }
 });
 
