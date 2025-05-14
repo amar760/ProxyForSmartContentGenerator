@@ -1,13 +1,10 @@
-const http = require("http");
 const express = require('express');
-const dotnev = require('dotenv');
 const axios = require("axios");
 const fs = require("fs").promises; // Import the fs module
 
 const app = express();
 require('dotenv').config(); 
 
-const hostname = "localhost";
 const port = process.env.PORT || 3001;
 const API_KEY = process.env.DIFY_API_KEY;
 const url = process.env.DIFY_API_ENDPOINT;
@@ -94,6 +91,10 @@ app.post('/api/proxy', async (req, res) => {
         res.end(JSON.stringify({ error: "Error making API call" }));
     }
 });
+
+app.get('/', async(req, res) => {
+    res.end("You are connected to proxy server");
+})
 
 app.listen(port, () => {
     console.log(`Proxy server running at ${port}`);
