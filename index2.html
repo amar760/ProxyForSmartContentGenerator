@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Statistics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .chart-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    canvas {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 1rem;
+    }
+    @media (max-width: 768px) {
+      .chart-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Growth Statistics</h1>
+  <div class="chart-container">
+    <canvas id="usersChart"></canvas>
+    <canvas id="parametersChart"></canvas>
+    <canvas id="readingChart"></canvas>
+    <canvas id="computeChart"></canvas>
+  </div>
+
+  <script>
+    // Chart 1: User Adoption
+    new Chart(document.getElementById('usersChart'), {
+      type: 'bar',
+      data: {
+        labels: ['First 18 Months'],
+        datasets: [{
+          label: 'Users of LLMs (in Billions)',
+          data: [1],
+          backgroundColor: '#4e73df'
+        }]
+      },
+      options: {
+        plugins: { title: { display: true, text: 'LLM Users' } },
+        scales: {
+          y: { beginAtZero: true, max: 2 }
+        }
+      }
+    });
+
+    // Chart 2: Model Parameters Growth
+    new Chart(document.getElementById('parametersChart'), {
+      type: 'line',
+      data: {
+        labels: ['2010', '2020', '2025'],
+        datasets: [{
+          label: 'Model Parameters (log scale)',
+          data: [10e6, 1e12, 10e12],
+          borderColor: '#1cc88a',
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        plugins: { title: { display: true, text: 'Model Parameter Growth (Millions → Trillions)' } },
+        scales: {
+          y: {
+            type: 'logarithmic',
+            beginAtZero: false,
+            title: { display: true, text: 'Parameters' }
+          }
+        }
+      }
+    });
+
+    // Chart 3: Words Read Comparison
+    new Chart(document.getElementById('readingChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Human Lifetime (8B)', 'AI Monthly (8T)'],
+        datasets: [{
+          label: 'Words Read',
+          data: [8e9, 8e12],
+          backgroundColor: ['#f6c23e', '#36b9cc']
+        }]
+      },
+      options: {
+        plugins: { title: { display: true, text: 'Words Read: Human vs AI' } }
+      }
+    });
+
+    // Chart 4: Compute Growth
+    new Chart(document.getElementById('computeChart'), {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 11}, (_, i) => 2015 + i),
+        datasets: [{
+          label: 'Compute Power (Relative, log scale)',
+          data: Array.from({length: 11}, (_, i) => Math.pow(10, i)),
+          borderColor: '#e74a3b',
+          fill: false
+        }]
+      },
+      options: {
+        plugins: { title: { display: true, text: 'AI Compute Power Growth (10x/year)' } },
+        scales: {
+          y: {
+            type: 'logarithmic',
+            beginAtZero: false,
+            title: { display: true, text: 'Relative Compute' }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

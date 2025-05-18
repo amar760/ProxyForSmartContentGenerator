@@ -5,7 +5,7 @@ const fs = require("fs").promises; // Import the fs module
 const app = express();
 require('dotenv').config(); 
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3009;
 const API_KEY = process.env.DIFY_API_KEY;
 const url = process.env.DIFY_API_ENDPOINT;
 
@@ -26,6 +26,7 @@ const fetchApiData = async () => {
     const parsedTranscript = JSON.parse(transcript);
     const QUERY = parsedTranscript.result.segments.map(segment => segment.text).join(" "); // Join with a space
 
+    console.log(QUERY);
     try {
         const response = await axios.post(
             url,
