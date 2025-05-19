@@ -63,7 +63,7 @@ async function processChunkContent(content) {
       }
     });
 
-    console.log(timestampUrlMap);
+    // console.log(timestampUrlMap);
   }
 
 
@@ -130,35 +130,35 @@ app.get('/status', (req, res) => {
 });
 
 
-app.post('/getChunks', async (req, res) => {
+app.get('/getChunks', async (req, res) => {
   try {
-    const { timestamp } = req.body;
-    if (!timestamp) {
-      return res.status(400).json({ error: 'Missing timestamp in request body' });
-    }
-
+   
     // List all .ts files in the chunks directory
     const files = fs.readdirSync(CHUNKS_DIR).filter(f => f.endsWith('.ts'));
-    
-    // Filter files with timestamp <= provided timestamp
-    const filteredFiles = files.filter(f => {
-      // Remove extension
-      const fileTimestamp = f.replace('.ts', '');
-      return fileTimestamp <= timestamp;
-    }).sort();
+    const sortedFiles = files.sort();
 
-    if (filteredFiles.length === 0) {
-      return res.status(404).json({ error: 'No chunks found for the given timestamp' });
+    // no chunks to send
+    if (sortedFiles.length === 0) {
+      return res.status(204).send();
     }
 
     // Read and concatenate contents
     let allBuffers = [];
-    for (const file of filteredFiles) {
+    for (const file of sortedFiles) {
       const filePath = path.join(CHUNKS_DIR, file);
       allBuffers.push(fs.readFileSync(filePath));
     }
 
     const combinedBuffer = Buffer.concat(allBuffers);
+
+    // Delete all files once data is stored in combinedBuffer
+    const deletePromises = sortedFiles.map(file => {
+      const filePath = path.join(CHUNKS_DIR, file);
+      return fs.promises.unlink(filePath);
+    });
+
+    await Promise.all(deletePromises);
+
     res.set('Content-Type', 'video/MP2T');
     res.send(combinedBuffer);
   } catch (err) {

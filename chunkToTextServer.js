@@ -36,11 +36,9 @@ app.use((req, res, next) => {
     next();
 });
 
-async function getChunks(timestamp) {
+async function getChunks() {
     try {
-      const response = await axios.post('http://localhost:3001/getChunks', {
-        timestamp: timestamp
-      }, {
+      const response = await axios.get('http://localhost:3001/getChunks', {
         responseType: 'arraybuffer' // Use this if you expect binary data
       });
       // response.data is a Buffer containing the binary data
@@ -72,21 +70,52 @@ async function getAudioFromChunks(chunkBuffer) {
     }); 
 }
 
-
-app.post('/getTranscriptTillTimestamp', async (req, res) => {
+const fetchTranscriptTillTimestamp = async () => {
     try{
-        const { timestamp } = req.body;
-        const chunkBuffer = await getChunks(timestamp);
+        // Read existing transcript.txt if it exists
+        let previousTranscript = '';
+        const transcriptPath = path.join(__dirname, 'transcript.txt');
+        if (fs.existsSync(transcriptPath)) {
+            previousTranscript = fs.readFileSync(transcriptPath, 'utf8');
+        }
+
+        const chunkBuffer = await getChunks();
+        if (!chunkBuffer){
+            return previousTranscript;
+        }
+
         await getAudioFromChunks(chunkBuffer);
 
+        console.log("Calling whisper...");
         const transcription = await openai.audio.transcriptions.create({
             file: fs.createReadStream('output.wav'),
             model: "whisper-1",
             language: "en", // this is optional but helps the model
         });
-        
+
+        // Append new transcript
+        const combinedTranscript = previousTranscript + (previousTranscript ? '\n' : '') + transcription.text;
+        fs.writeFileSync(transcriptPath, combinedTranscript, 'utf8');
+
         console.log(transcription.text);
-        res.status(200).json({transcript: transcription.text});
+        return combinedTranscript;
+    } catch(e){
+        console.error("Error fetching transcript from audio", e.message);
+    }
+}
+
+const pollForChunks = async () => {
+    while (true){
+        await fetchTranscriptTillTimestamp();
+        await new Promise(resolve => setTimeout(resolve, 10000));
+    }
+}
+
+
+app.get('/getTranscript', async (req, res) => {
+    try{
+        const transcript = await fetchTranscriptTillTimestamp();
+        res.status(200).json({transcript: transcript});
     } catch(e){
         res.status(500).json({error: e.message});
     }
@@ -95,6 +124,6 @@ app.post('/getTranscriptTillTimestamp', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    // fetchChunks();
+    pollForChunks();
 });
   
