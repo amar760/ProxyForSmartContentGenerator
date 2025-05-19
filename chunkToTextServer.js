@@ -100,7 +100,7 @@ const fetchTranscriptTillTimestamp = async () => {
         console.log(transcription.text);
         return combinedTranscript;
     } catch(e){
-        console.error("Error fetching transcript from audio", e.message);
+        console.error("Error fetching transcript from audio", e);
     }
 }
 
@@ -114,8 +114,14 @@ const pollForChunks = async () => {
 
 app.get('/getTranscript', async (req, res) => {
     try{
-        const transcript = await fetchTranscriptTillTimestamp();
-        res.status(200).json({transcript: transcript});
+        let currentTranscript = '';
+        const transcriptPath = path.join(__dirname, 'transcript.txt');
+        if (fs.existsSync(transcriptPath)) {
+            currentTranscript = fs.readFileSync(transcriptPath, 'utf8');
+        } else {
+            currentTranscript = "No transcript as of now..."
+        }
+        res.status(200).json({transcript: currentTranscript});
     } catch(e){
         res.status(500).json({error: e.message});
     }
